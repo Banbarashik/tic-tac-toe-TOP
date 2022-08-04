@@ -1,3 +1,9 @@
+const state = {
+  playerX: {},
+  playerO: {},
+  curPlayer: {},
+};
+
 const Gameboard = (function () {
   const gameboardArr = [
     [["X"], ["O"], ["X"]],
@@ -5,15 +11,19 @@ const Gameboard = (function () {
     [["X"], ["O"], ["X"]],
   ];
 
-  function switchPlayer(players) {
-    players.forEach((player) => (player.move = !player.move));
+  function controlGameboard(row, col) {
+    // code fully describing player's move
+    console.log(state);
+    state.curPlayer.makeMove(gameboardArr, row, col);
+
+    // switch player
+    state.curPlayer === state.playerX ? state.playerO : state.playerX;
+
+    // render gameboard
+    displayController.renderGameboard(gameboardArr);
   }
 
-  function makeGameboardActive(player, row, col) {
-    gameboardArr[row - 1][col - 1] = [player.marker];
-  }
-
-  return { gameboardArr, switchPlayer, makeGameboardActive };
+  return { gameboardArr, controlGameboard };
 })();
 
 const displayController = (function () {
@@ -59,36 +69,24 @@ const Player = function (name, marker) {
 
 function gameSession() {
   // create players
-  const player1 = Player("Leha", "X");
-  const player2 = Player("Gura", "O");
+  state.playerX = Player("Leha", "X");
+  state.playerO = Player("Gura", "O");
 
-  const curPlayer = player1.move ? player1 : player2;
+  state.curPlayer = state.playerX;
 
   // attach an event listener so that curPlayer can add his mark on a gamecell
-  displayController.addHandlerAddMark(
-    Gameboard.makeGameboardActive.bind(null, curPlayer)
-  );
-
-  // after each move:
-  // 1) curPlayer is changed
-  // 2) gameboard is rendered
-
-  // allow the current player to make a move
-  // curPlayer.makeMove(Gameboard.gameboardArr, 3, 2);
-
-  // update gameboard UI
-  displayController.renderGameboard(Gameboard.gameboardArr);
+  displayController.addHandlerAddMark(Gameboard.controlGameboard);
 }
 
 gameSession();
 
 // Init a game session
-// console.log(player1, player2);
-// Gameboard.switchPlayer([player1, player2]);
-// console.log(player1, player2);
+// console.log(playerX, playerO);
+// Gameboard.switchPlayer([playerX, playerO]);
+// console.log(playerX, playerO);
 
-// player1.makeMove(Gameboard.gameboardArr, 1, 2);
-// player2.makeMove(Gameboard.gameboardArr, 1, 1);
+// playerX.makeMove(Gameboard.gameboardArr, 1, 2);
+// playerO.makeMove(Gameboard.gameboardArr, 1, 1);
 
 /*
   TODO:
