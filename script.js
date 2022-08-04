@@ -6,18 +6,20 @@ const state = {
 
 const Gameboard = (function () {
   const gameboardArr = [
-    [["X"], ["O"], ["X"]],
-    [["O"], ["X"], ["O"]],
-    [["X"], ["O"], ["X"]],
+    [[], [], []],
+    [[], [], []],
+    [[], [], []],
   ];
 
   function controlGameboard(row, col) {
-    // code fully describing player's move
-    console.log(state);
+    // Don't allow to add mark to a cell that already is occupied
+    if (gameboardArr[row - 1][col - 1].length > 0) return;
+
     state.curPlayer.makeMove(gameboardArr, row, col);
 
     // switch player
-    state.curPlayer === state.playerX ? state.playerO : state.playerX;
+    state.curPlayer =
+      state.curPlayer === state.playerX ? state.playerO : state.playerX;
 
     // render gameboard
     displayController.renderGameboard(gameboardArr);
@@ -74,7 +76,7 @@ function gameSession() {
 
   state.curPlayer = state.playerX;
 
-  // attach an event listener so that curPlayer can add his mark on a gamecell
+  // attach an event listener so that curPlayer can add his mark to a gamecell
   displayController.addHandlerAddMark(Gameboard.controlGameboard);
 }
 
