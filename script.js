@@ -9,7 +9,11 @@ const Gameboard = (function () {
     players.forEach((player) => (player.move = !player.move));
   }
 
-  return { gameboardArr, switchPlayer };
+  function makeGameboardActive(player, row, col) {
+    gameboardArr[row - 1][col - 1] = [player.marker];
+  }
+
+  return { gameboardArr, switchPlayer, makeGameboardActive };
 })();
 
 const displayController = (function () {
@@ -19,8 +23,8 @@ const displayController = (function () {
   // render gameboard in the DOM
   function renderGameboard(gameboard) {
     gameboardCellEls.forEach((cell) => {
-      const cellRow = cell.dataset.row;
-      const cellCol = cell.dataset.col;
+      const cellRow = +cell.dataset.row;
+      const cellCol = +cell.dataset.col;
 
       cell.dataset.marker = gameboard[cellRow - 1][cellCol - 1];
 
@@ -28,7 +32,19 @@ const displayController = (function () {
     });
   }
 
-  return { renderGameboard };
+  function addHandlerAddMark(handler) {
+    gameboardEl.addEventListener("click", function (e) {
+      const cell = e.target.closest(".gameboard__cell");
+      if (!cell) return;
+
+      const row = +cell.dataset.row;
+      const col = +cell.dataset.col;
+
+      handler(row, col);
+    });
+  }
+
+  return { renderGameboard, addHandlerAddMark };
 })();
 
 const Player = function (name, marker) {
@@ -41,17 +57,38 @@ const Player = function (name, marker) {
   return { name, marker, move, makeMove };
 };
 
+function gameSession() {
+  // create players
+  const player1 = Player("Leha", "X");
+  const player2 = Player("Gura", "O");
+
+  const curPlayer = player1.move ? player1 : player2;
+
+  // attach an event listener so that curPlayer can add his mark on a gamecell
+  displayController.addHandlerAddMark(
+    Gameboard.makeGameboardActive.bind(null, curPlayer)
+  );
+
+  // after each move:
+  // 1) curPlayer is changed
+  // 2) gameboard is rendered
+
+  // allow the current player to make a move
+  // curPlayer.makeMove(Gameboard.gameboardArr, 3, 2);
+
+  // update gameboard UI
+  displayController.renderGameboard(Gameboard.gameboardArr);
+}
+
+gameSession();
+
 // Init a game session
-const player1 = Player("Leha", "X");
-const player2 = Player("Gura", "O");
-console.log(player1, player2);
-Gameboard.switchPlayer([player1, player2]);
-console.log(player1, player2);
+// console.log(player1, player2);
+// Gameboard.switchPlayer([player1, player2]);
+// console.log(player1, player2);
 
-player1.makeMove(Gameboard.gameboardArr, 1, 2);
-player2.makeMove(Gameboard.gameboardArr, 1, 1);
-
-displayController.renderGameboard(Gameboard.gameboardArr);
+// player1.makeMove(Gameboard.gameboardArr, 1, 2);
+// player2.makeMove(Gameboard.gameboardArr, 1, 1);
 
 /*
   TODO:
