@@ -4,14 +4,28 @@ const state = {
   curPlayer: {},
 };
 
+const startWindow = (function () {
+  const _startWindow = document.querySelector('.players__cards');
+  const startBtn = document.querySelector('.btn--start');
+
+  function startGame() {
+    displayController.toggleHidden(_startWindow, Gameboard.gameboardEl);
+  }
+
+  return { startBtn, startGame };
+})();
+
 const Gameboard = (function () {
+  const gameboardEl = document.querySelector('.gameboard');
+  const gameboardCellEls = document.querySelectorAll('.gameboard__cell');
+
   const gameboardArr = [
     [[], [], []],
     [[], [], []],
     [[], [], []],
   ];
 
-  function checkMarksPositions() {
+  function _checkMarksPositions() {
     // HORIZONTAL DIRECTION
     gameboardArr.forEach(row => {
       if (row.every(cell => cell[0] === 'X')) console.log('PlayerX won!');
@@ -64,19 +78,19 @@ const Gameboard = (function () {
     // render gameboard
     displayController.renderGameboard(gameboardArr);
 
-    checkMarksPositions();
+    _checkMarksPositions();
   }
 
-  return { gameboardArr, controlGameboard };
+  return { gameboardEl, gameboardCellEls, gameboardArr, controlGameboard };
 })();
 
 const displayController = (function () {
-  const gameboardEl = document.querySelector('.gameboard');
-  const gameboardCellEls = document.querySelectorAll('.gameboard__cell');
+  const toggleHidden = (...els) =>
+    els.forEach(el => el.classList.toggle('hidden'));
 
   // render gameboard in the DOM
   function renderGameboard(gameboard) {
-    gameboardCellEls.forEach(cell => {
+    Gameboard.gameboardCellEls.forEach(cell => {
       const cellRow = +cell.dataset.row;
       const cellCol = +cell.dataset.col;
 
@@ -86,8 +100,12 @@ const displayController = (function () {
     });
   }
 
+  function addHandlerStartBtn(handler) {
+    startWindow.startBtn.addEventListener('click', handler);
+  }
+
   function addHandlerAddMark(handler) {
-    gameboardEl.addEventListener('click', function (e) {
+    Gameboard.gameboardEl.addEventListener('click', function (e) {
       const cell = e.target.closest('.gameboard__cell');
       if (!cell) return;
 
@@ -98,7 +116,12 @@ const displayController = (function () {
     });
   }
 
-  return { renderGameboard, addHandlerAddMark };
+  return {
+    toggleHidden,
+    renderGameboard,
+    addHandlerStartBtn,
+    addHandlerAddMark,
+  };
 })();
 
 const Player = function (name, marker) {
@@ -123,6 +146,8 @@ function gameSession() {
 }
 
 gameSession();
+
+displayController.addHandlerStartBtn(startWindow.startGame);
 
 // TODO:
 // Build the logic that checks for when the game is over! Should check for 3-in-a-row and a tie.
