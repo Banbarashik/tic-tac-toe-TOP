@@ -11,6 +11,46 @@ const Gameboard = (function () {
     [[], [], []],
   ];
 
+  function checkMarksPositions() {
+    // HORIZONTAL DIRECTION
+    gameboardArr.forEach(row => {
+      if (row.every(cell => cell[0] === 'X')) console.log('PlayerX won!');
+      if (row.every(cell => cell[0] === 'O')) console.log('PlayerO won!');
+    });
+
+    // VERTICAL DIRECTION
+    for (let i = 0; i < 3; i++) {
+      const colsArr = gameboardArr.reduce((arr, row) => {
+        arr.push(row[i]);
+        return arr;
+      }, []);
+
+      if (colsArr.every(col => col[0] === 'X')) console.log('PlayerX won!');
+      if (colsArr.every(col => col[0] === 'O')) console.log('PlayerO won!');
+    }
+
+    // DIAOGONAL DIRECTION
+    for (let i = 0, arr = []; i < 3; i++) {
+      arr.push(gameboardArr[i][i]);
+
+      if (arr.length === 3 && arr.every(cell => cell[0] === 'X'))
+        console.log('PlayerX won!');
+
+      if (arr.length === 3 && arr.every(cell => cell[0] === 'O'))
+        console.log('PlayerO won!');
+    }
+
+    for (let i = 0, arr = []; i < 3; i++) {
+      arr.push(gameboardArr[i][2 - i]);
+
+      if (arr.length === 3 && arr.every(cell => cell[0] === 'X'))
+        console.log('PlayerX won!');
+
+      if (arr.length === 3 && arr.every(cell => cell[0] === 'O'))
+        console.log('PlayerO won!');
+    }
+  }
+
   function controlGameboard(row, col) {
     // Don't allow to add mark to a cell that already is occupied
     if (gameboardArr[row - 1][col - 1].length > 0) return;
@@ -23,18 +63,20 @@ const Gameboard = (function () {
 
     // render gameboard
     displayController.renderGameboard(gameboardArr);
+
+    checkMarksPositions();
   }
 
   return { gameboardArr, controlGameboard };
 })();
 
 const displayController = (function () {
-  const gameboardEl = document.querySelector(".gameboard");
-  const gameboardCellEls = document.querySelectorAll(".gameboard__cell");
+  const gameboardEl = document.querySelector('.gameboard');
+  const gameboardCellEls = document.querySelectorAll('.gameboard__cell');
 
   // render gameboard in the DOM
   function renderGameboard(gameboard) {
-    gameboardCellEls.forEach((cell) => {
+    gameboardCellEls.forEach(cell => {
       const cellRow = +cell.dataset.row;
       const cellCol = +cell.dataset.col;
 
@@ -45,8 +87,8 @@ const displayController = (function () {
   }
 
   function addHandlerAddMark(handler) {
-    gameboardEl.addEventListener("click", function (e) {
-      const cell = e.target.closest(".gameboard__cell");
+    gameboardEl.addEventListener('click', function (e) {
+      const cell = e.target.closest('.gameboard__cell');
       if (!cell) return;
 
       const row = +cell.dataset.row;
@@ -60,7 +102,7 @@ const displayController = (function () {
 })();
 
 const Player = function (name, marker) {
-  const move = marker === "X" ? true : false;
+  const move = marker === 'X' ? true : false;
 
   function makeMove(gameboard, row, col) {
     gameboard[row - 1][col - 1] = [marker];
@@ -71,8 +113,8 @@ const Player = function (name, marker) {
 
 function gameSession() {
   // create players
-  state.playerX = Player("Leha", "X");
-  state.playerO = Player("Gura", "O");
+  state.playerX = Player('Leha', 'X');
+  state.playerO = Player('Gura', 'O');
 
   state.curPlayer = state.playerX;
 
@@ -82,17 +124,5 @@ function gameSession() {
 
 gameSession();
 
-// Init a game session
-// console.log(playerX, playerO);
-// Gameboard.switchPlayer([playerX, playerO]);
-// console.log(playerX, playerO);
-
-// playerX.makeMove(Gameboard.gameboardArr, 1, 2);
-// playerO.makeMove(Gameboard.gameboardArr, 1, 1);
-
-/*
-  TODO:
-  1) Build the functions that allow players to add marks to a specific spot on the board - done
-  2) Tie it to the DOM, letting players click on the gameboard to place their marker
-  3) Don’t forget the logic that keeps players from playing in spots that are already taken
-*/
+// TODO:
+// Build the logic that checks for when the game is over! Should check for 3-in-a-row and a tie.
