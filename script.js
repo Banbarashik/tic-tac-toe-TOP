@@ -7,9 +7,16 @@ const state = {
 const startWindow = (function () {
   const _startWindow = document.querySelector('.players__cards');
   const startBtn = document.querySelector('.btn--start');
+  const _playerXInput = document.querySelector('.playerX input');
+  const _playerOInput = document.querySelector('.playerO input');
 
   function startGame() {
     displayController.toggleHidden(_startWindow, Gameboard.gameboardEl);
+
+    const playerXname = _playerXInput.value ? _playerXInput.value : 'playerX';
+    const playerOname = _playerOInput.value ? _playerOInput.value : 'playerO';
+
+    gameSession(playerXname, playerOname);
   }
 
   return { startBtn, startGame };
@@ -25,11 +32,13 @@ const Gameboard = (function () {
     [[], [], []],
   ];
 
-  function _checkMarksPositions() {
+  function _checkIsGameOver() {
     // HORIZONTAL DIRECTION
     gameboardArr.forEach(row => {
-      if (row.every(cell => cell[0] === 'X')) console.log('PlayerX won!');
-      if (row.every(cell => cell[0] === 'O')) console.log('PlayerO won!');
+      if (row.every(cell => cell[0] === 'X'))
+        return displayController.showWinnerMsg(state.playerX.name);
+      if (row.every(cell => cell[0] === 'O'))
+        return displayController.showWinnerMsg(state.playerO.name);
     });
 
     // VERTICAL DIRECTION
@@ -39,8 +48,10 @@ const Gameboard = (function () {
         return arr;
       }, []);
 
-      if (colsArr.every(col => col[0] === 'X')) console.log('PlayerX won!');
-      if (colsArr.every(col => col[0] === 'O')) console.log('PlayerO won!');
+      if (colsArr.every(col => col[0] === 'X'))
+        return displayController.showWinnerMsg(state.playerX.name);
+      if (colsArr.every(col => col[0] === 'O'))
+        return displayController.showWinnerMsg(state.playerO.name);
     }
 
     // DIAOGONAL DIRECTION
@@ -48,21 +59,25 @@ const Gameboard = (function () {
       arr.push(gameboardArr[i][i]);
 
       if (arr.length === 3 && arr.every(cell => cell[0] === 'X'))
-        console.log('PlayerX won!');
+        return displayController.showWinnerMsg(state.playerX.name);
 
       if (arr.length === 3 && arr.every(cell => cell[0] === 'O'))
-        console.log('PlayerO won!');
+        return displayController.showWinnerMsg(state.playerO.name);
     }
 
     for (let i = 0, arr = []; i < 3; i++) {
       arr.push(gameboardArr[i][2 - i]);
 
       if (arr.length === 3 && arr.every(cell => cell[0] === 'X'))
-        console.log('PlayerX won!');
+        return displayController.showWinnerMsg(state.playerX.name);
 
       if (arr.length === 3 && arr.every(cell => cell[0] === 'O'))
-        console.log('PlayerO won!');
+        return displayController.showWinnerMsg(state.playerO.name);
     }
+
+    // TIE
+    if (gameboardArr.every(row => row.every(cell => cell.length > 0)))
+      displayController.showWinnerMsg();
   }
 
   function controlGameboard(row, col) {
@@ -78,13 +93,15 @@ const Gameboard = (function () {
     // render gameboard
     displayController.renderGameboard(gameboardArr);
 
-    _checkMarksPositions();
+    _checkIsGameOver();
   }
 
   return { gameboardEl, gameboardCellEls, gameboardArr, controlGameboard };
 })();
 
 const displayController = (function () {
+  const _overlay = document.querySelector('.overlay');
+
   const toggleHidden = (...els) =>
     els.forEach(el => el.classList.toggle('hidden'));
 
@@ -98,6 +115,22 @@ const displayController = (function () {
 
       cell.textContent = cell.dataset.marker;
     });
+  }
+
+  function showWinnerMsg(playerName) {
+    toggleHidden(_overlay);
+
+    const markup = `
+      <div class="msg--winner">  
+        <span>${playerName ? playerName + 'won!' : "It's a tie!"}</span>
+        <div>
+          <button class="btn--start-menu">Start menu</button>
+          <button class="btn--play-again">Play again</button>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', markup);
   }
 
   function addHandlerStartBtn(handler) {
@@ -119,35 +152,38 @@ const displayController = (function () {
   return {
     toggleHidden,
     renderGameboard,
+    showWinnerMsg,
     addHandlerStartBtn,
     addHandlerAddMark,
   };
 })();
 
 const Player = function (name, marker) {
-  const move = marker === 'X' ? true : false;
-
   function makeMove(gameboard, row, col) {
     gameboard[row - 1][col - 1] = [marker];
   }
 
-  return { name, marker, move, makeMove };
+  return { name, marker, makeMove };
 };
 
-function gameSession() {
+function gameSession(playerXname, playerOname) {
   // create players
-  state.playerX = Player('Leha', 'X');
-  state.playerO = Player('Gura', 'O');
+  state.playerX = Player(playerXname, 'X');
+  state.playerO = Player(playerOname, 'O');
 
+  // playerX is the first player to make a move
   state.curPlayer = state.playerX;
-
-  // attach an event listener so that curPlayer can add his mark to a gamecell
-  displayController.addHandlerAddMark(Gameboard.controlGameboard);
 }
 
 gameSession();
 
-displayController.addHandlerStartBtn(startWindow.startGame);
+function init() {
+  displayController.addHandlerStartBtn(startWindow.startGame);
+  // attach an event listener so that curPlayer can add his mark to a gamecell
+  displayController.addHandlerAddMark(Gameboard.controlGameboard);
+}
+
+init();
 
 // TODO:
 // Build the logic that checks for when the game is over! Should check for 3-in-a-row and a tie.

@@ -18,6 +18,18 @@ body {
   opacity: 0;
 }
 
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  transition: all 0.5s;
+}
+
 .players__cards {
   position: relative;
   display: flex;
@@ -39,7 +51,7 @@ body {
 
   border-radius: 15%;
 
-  background-color: aquamarine;
+  background-color: bisque;
 }
 
 .players__card--marker {
@@ -75,4 +87,27 @@ body {
   background-color: bisque;
 
   font-size: 2.8rem;
+}
+
+.msg--winner {
+  position: absolute;
+  z-index: 1000;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  width: 40rem;
+  height: 20rem;
+  border: 1px solid black;
+
+  border-radius: 10px;
+
+  background-color: bisque;
+
+  font-size: 6.2rem;
 }
