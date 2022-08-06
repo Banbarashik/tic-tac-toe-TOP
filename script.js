@@ -33,47 +33,27 @@ const Gameboard = (function () {
   ];
 
   function _checkIsGameOver() {
-    // HORIZONTAL DIRECTION
-    gameboardArr.forEach(row => {
-      if (row.every(cell => cell[0] === 'X'))
-        return displayController.showWinnerMsg(state.playerX.name);
-      if (row.every(cell => cell[0] === 'O'))
-        return displayController.showWinnerMsg(state.playerO.name);
-    });
+    // prettier-ignore
+    const arrV1 = [], arrV2 = [], arrV3 = [], arrH1 = [],
+    arrH2 = [], arrH3 = [], arrD1 = [], arrD2 = [];
 
-    // VERTICAL DIRECTION
-    for (let i = 0; i < 3; i++) {
-      const colsArr = gameboardArr.reduce((arr, row) => {
-        arr.push(row[i]);
-        return arr;
-      }, []);
+    const allArrs = [arrV1, arrV2, arrV3, arrH1, arrH2, arrH3, arrD1, arrD2];
 
-      if (colsArr.every(col => col[0] === 'X'))
-        return displayController.showWinnerMsg(state.playerX.name);
-      if (colsArr.every(col => col[0] === 'O'))
-        return displayController.showWinnerMsg(state.playerO.name);
+    for (let i = 0; i <= 2; i++) {
+      arrV1.push(gameboardArr[i][0]);
+      arrV2.push(gameboardArr[i][1]);
+      arrV3.push(gameboardArr[i][2]);
+      arrH1.push(gameboardArr[0][i]);
+      arrH2.push(gameboardArr[1][i]);
+      arrH3.push(gameboardArr[2][i]);
+      arrD1.push(gameboardArr[i][i]);
+      arrD2.push(gameboardArr[i][2 - i]);
     }
 
-    // DIAOGONAL DIRECTION
-    for (let i = 0, arr = []; i < 3; i++) {
-      arr.push(gameboardArr[i][i]);
-
-      if (arr.length === 3 && arr.every(cell => cell[0] === 'X'))
-        return displayController.showWinnerMsg(state.playerX.name);
-
-      if (arr.length === 3 && arr.every(cell => cell[0] === 'O'))
-        return displayController.showWinnerMsg(state.playerO.name);
-    }
-
-    for (let i = 0, arr = []; i < 3; i++) {
-      arr.push(gameboardArr[i][2 - i]);
-
-      if (arr.length === 3 && arr.every(cell => cell[0] === 'X'))
-        return displayController.showWinnerMsg(state.playerX.name);
-
-      if (arr.length === 3 && arr.every(cell => cell[0] === 'O'))
-        return displayController.showWinnerMsg(state.playerO.name);
-    }
+    if (allArrs.some(arr => arr.every(cell => cell[0] === 'X')))
+      return displayController.showWinnerMsg(state.playerX.name);
+    else if (allArrs.some(arr => arr.every(cell => cell[0] === 'O')))
+      return displayController.showWinnerMsg(state.playerO.name);
 
     // TIE
     if (gameboardArr.every(row => row.every(cell => cell.length > 0)))
@@ -105,7 +85,7 @@ const displayController = (function () {
   const toggleHidden = (...els) =>
     els.forEach(el => el.classList.toggle('hidden'));
 
-  // render gameboard in the DOM
+  // Render the gameboard
   function renderGameboard(gameboard) {
     Gameboard.gameboardCellEls.forEach(cell => {
       const cellRow = +cell.dataset.row;
@@ -159,8 +139,9 @@ const displayController = (function () {
 })();
 
 const Player = function (name, marker) {
-  const makeMove = (row, col) =>
-    (Gameboard.gameboardArr[row - 1][col - 1] = [marker]);
+  function makeMove(row, col) {
+    Gameboard.gameboardArr[row - 1][col - 1] = [marker];
+  }
 
   return { name, marker, makeMove };
 };
