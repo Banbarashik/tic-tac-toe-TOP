@@ -80,23 +80,23 @@ const Gameboard = (function () {
       displayController.showWinnerMsg();
   }
 
-  function controlGameboard(row, col) {
-    // Don't allow to add mark to a cell that already is occupied
+  function controlPlayerMove(row, col) {
+    // Don't allow to add a marker if the cell is occupied
     if (gameboardArr[row - 1][col - 1].length > 0) return;
 
-    state.curPlayer.makeMove(gameboardArr, row, col);
+    state.curPlayer.makeMove(row, col);
 
-    // switch player
+    // Switch player
     state.curPlayer =
       state.curPlayer === state.playerX ? state.playerO : state.playerX;
 
-    // render gameboard
+    // Render gameboard
     displayController.renderGameboard(gameboardArr);
 
     _checkIsGameOver();
   }
 
-  return { gameboardEl, gameboardCellEls, gameboardArr, controlGameboard };
+  return { gameboardEl, gameboardCellEls, gameboardArr, controlPlayerMove };
 })();
 
 const displayController = (function () {
@@ -159,19 +159,18 @@ const displayController = (function () {
 })();
 
 const Player = function (name, marker) {
-  function makeMove(gameboard, row, col) {
-    gameboard[row - 1][col - 1] = [marker];
-  }
+  const makeMove = (row, col) =>
+    (Gameboard.gameboardArr[row - 1][col - 1] = [marker]);
 
   return { name, marker, makeMove };
 };
 
 function gameSession(playerXname, playerOname) {
-  // create players
+  // Create players
   state.playerX = Player(playerXname, 'X');
   state.playerO = Player(playerOname, 'O');
 
-  // playerX is the first player to make a move
+  // PlayerX is the first player to make a move
   state.curPlayer = state.playerX;
 }
 
@@ -179,8 +178,8 @@ gameSession();
 
 function init() {
   displayController.addHandlerStartBtn(startWindow.startGame);
-  // attach an event listener so that curPlayer can add his mark to a gamecell
-  displayController.addHandlerAddMark(Gameboard.controlGameboard);
+  // Attach an event listener so that curPlayer can add his mark to a gamecell
+  displayController.addHandlerAddMark(Gameboard.controlPlayerMove);
 }
 
 init();
