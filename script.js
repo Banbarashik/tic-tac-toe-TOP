@@ -41,30 +41,35 @@ const Gameboard = (function () {
   ];
 
   function _checkIsGameOver() {
-    const checkCombination = marker =>
-      allArrs.some(arr => arr.every(cell => cell[0] === marker));
+    const checkCombinations = (marker, ...directions) =>
+      directions.some(arrDir =>
+        arrDir.some(subArrDir => subArrDir.every(cell => cell[0] === marker))
+      );
 
     // prettier-ignore
-    // Arrays for all possible winning combinations
-    const arrV1 = [], arrV2 = [], arrV3 = [], arrH1 = [],
-    arrH2 = [], arrH3 = [], arrD1 = [], arrD2 = [];
+    // Arrays with winning combinations for each direction
+    // arrV - vertical, arrH - horizontal, arrD - diagonal
+    const arrV = [], arrH = [], arrD = [];
 
-    const allArrs = [arrV1, arrV2, arrV3, arrH1, arrH2, arrH3, arrD1, arrD2];
+    for (let i = 0, subArrD1 = [], subArrD2 = []; i <= 2; i++) {
+      subArrD1.push(gameboardArr[i][i]);
+      subArrD2.push(gameboardArr[i][2 - i]);
+      if (i === 2) arrD.push(subArrD1, subArrD2);
 
-    for (let i = 0; i <= 2; i++) {
-      arrV1.push(gameboardArr[i][0]);
-      arrV2.push(gameboardArr[i][1]);
-      arrV3.push(gameboardArr[i][2]);
-      arrH1.push(gameboardArr[0][i]);
-      arrH2.push(gameboardArr[1][i]);
-      arrH3.push(gameboardArr[2][i]);
-      arrD1.push(gameboardArr[i][i]);
-      arrD2.push(gameboardArr[i][2 - i]);
+      for (let j = 0, subArrV = [], subArrH = []; j <= 2; j++) {
+        subArrV.push(gameboardArr[j][i]);
+        subArrH.push(gameboardArr[i][j]);
+
+        if (j === 2) {
+          arrV.push(subArrV);
+          arrH.push(subArrH);
+        }
+      }
     }
 
-    if (checkCombination('X'))
+    if (checkCombinations('X', arrV, arrH, arrD))
       return displayController.showWinnerMsg(state.playerX.name);
-    else if (checkCombination('O'))
+    else if (checkCombinations('O', arrV, arrH, arrD))
       return displayController.showWinnerMsg(state.playerO.name);
 
     // TIE
