@@ -4,6 +4,14 @@ const state = {
   curPlayer: {},
 };
 
+const Player = function (name, marker) {
+  function makeMove(row, col) {
+    Gameboard.gameboardArr[row][col] = [marker];
+  }
+
+  return { name, marker, makeMove };
+};
+
 const startWindow = (function () {
   const _startWindow = document.querySelector('.players__cards');
   const startBtn = document.querySelector('.btn--start');
@@ -79,7 +87,7 @@ const Gameboard = (function () {
 
   function controlPlayerMove(row, col) {
     // Don't allow to add a marker if the cell is occupied
-    if (gameboardArr[row - 1][col - 1].length > 0) return;
+    if (gameboardArr[row][col].length > 0) return;
 
     state.curPlayer.makeMove(row, col);
 
@@ -108,7 +116,7 @@ const displayController = (function () {
       const cellRow = +cell.dataset.row;
       const cellCol = +cell.dataset.col;
 
-      cell.dataset.marker = gameboard[cellRow - 1][cellCol - 1];
+      cell.dataset.marker = gameboard[cellRow][cellCol];
 
       cell.textContent = cell.dataset.marker;
     });
@@ -134,7 +142,7 @@ const displayController = (function () {
     startWindow.startBtn.addEventListener('click', handler);
   }
 
-  function addHandlerAddMark(handler) {
+  function addHandlerPlayerMove(handler) {
     Gameboard.gameboardEl.addEventListener('click', function (e) {
       const cell = e.target.closest('.gameboard__cell');
       if (!cell) return;
@@ -151,23 +159,15 @@ const displayController = (function () {
     renderGameboard,
     showWinnerMsg,
     addHandlerStartBtn,
-    addHandlerAddMark,
+    addHandlerPlayerMove,
   };
 })();
-
-const Player = function (name, marker) {
-  function makeMove(row, col) {
-    Gameboard.gameboardArr[row - 1][col - 1] = [marker];
-  }
-
-  return { name, marker, makeMove };
-};
 
 function init() {
   displayController.addHandlerStartBtn(startWindow.startGame);
 
   // Attach an event listener so that curPlayer can add his mark to a gamecell
-  displayController.addHandlerAddMark(Gameboard.controlPlayerMove);
+  displayController.addHandlerPlayerMove(Gameboard.controlPlayerMove);
 }
 
 init();
