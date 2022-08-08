@@ -16,7 +16,12 @@ const startWindow = (function () {
     const playerXname = _playerXInput.value ? _playerXInput.value : 'playerX';
     const playerOname = _playerOInput.value ? _playerOInput.value : 'playerO';
 
-    gameSession(playerXname, playerOname);
+    // Create players
+    state.playerX = Player(playerXname, 'X');
+    state.playerO = Player(playerOname, 'O');
+
+    // Set PlayerX to be the first player to make a move
+    state.curPlayer = state.playerX;
   }
 
   return { startBtn, startGame };
@@ -102,7 +107,7 @@ const displayController = (function () {
 
     const markup = `
       <div class="msg--winner">  
-        <span>${playerName ? playerName + 'won!' : "It's a tie!"}</span>
+        <span>${playerName ? playerName + ' won!' : "It's a tie!"}</span>
         <div>
           <button class="btn--start-menu">Start menu</button>
           <button class="btn--play-again">Play again</button>
@@ -146,24 +151,14 @@ const Player = function (name, marker) {
   return { name, marker, makeMove };
 };
 
-function gameSession(playerXname, playerOname) {
-  // Create players
-  state.playerX = Player(playerXname, 'X');
-  state.playerO = Player(playerOname, 'O');
-
-  // PlayerX is the first player to make a move
-  state.curPlayer = state.playerX;
-}
-
-gameSession();
-
 function init() {
   displayController.addHandlerStartBtn(startWindow.startGame);
+
   // Attach an event listener so that curPlayer can add his mark to a gamecell
   displayController.addHandlerAddMark(Gameboard.controlPlayerMove);
 }
 
 init();
 
-// TODO:
-// Build the logic that checks for when the game is over! Should check for 3-in-a-row and a tie.
+// NOTES:
+// - all events are attached at displayController
