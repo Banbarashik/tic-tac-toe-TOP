@@ -11,8 +11,10 @@ const startWindow = (function () {
   const _playerOInput = document.querySelector('.playerO input');
 
   function startGame() {
+    // Hide the start window, show the gameboard
     displayController.toggleHidden(_startWindow, Gameboard.gameboardEl);
 
+    // Fetch players names from the DOM
     const playerXname = _playerXInput.value ? _playerXInput.value : 'playerX';
     const playerOname = _playerOInput.value ? _playerOInput.value : 'playerO';
 
@@ -31,6 +33,7 @@ const Gameboard = (function () {
   const gameboardEl = document.querySelector('.gameboard');
   const gameboardCellEls = document.querySelectorAll('.gameboard__cell');
 
+  // State of the gameboard
   const gameboardArr = [
     [[], [], []],
     [[], [], []],
@@ -38,7 +41,11 @@ const Gameboard = (function () {
   ];
 
   function _checkIsGameOver() {
+    const checkCombination = marker =>
+      allArrs.some(arr => arr.every(cell => cell[0] === marker));
+
     // prettier-ignore
+    // Arrays for all possible winning combinations
     const arrV1 = [], arrV2 = [], arrV3 = [], arrH1 = [],
     arrH2 = [], arrH3 = [], arrD1 = [], arrD2 = [];
 
@@ -55,9 +62,9 @@ const Gameboard = (function () {
       arrD2.push(gameboardArr[i][2 - i]);
     }
 
-    if (allArrs.some(arr => arr.every(cell => cell[0] === 'X')))
+    if (checkCombination('X'))
       return displayController.showWinnerMsg(state.playerX.name);
-    else if (allArrs.some(arr => arr.every(cell => cell[0] === 'O')))
+    else if (checkCombination('O'))
       return displayController.showWinnerMsg(state.playerO.name);
 
     // TIE
