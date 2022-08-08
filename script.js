@@ -37,9 +37,40 @@ const startWindow = (function () {
   return { startBtn, startGame };
 })();
 
+const endWindow = (function () {
+  const endWindowEl = document.querySelector('.msg--winner');
+  const winnerMsgEl = document.querySelector('.msg--winner-text');
+  const playAgainBtn = document.querySelector('.btn--play-again');
+  const startMenuBtn = document.querySelector('.btn--start-menu');
+
+  function resetGame() {
+    // 1) Return gameboardArr to the initial state
+    Gameboard.gameboardArr.forEach(row =>
+      row.forEach(cell => (cell.length = 0))
+    );
+
+    // 2) Clear cell's 'marker' property and text content
+    Gameboard.gameboardCellsEls.forEach(cell => {
+      cell.dataset.marker = '';
+      cell.textContent = '';
+    });
+
+    // 3) Hide an overlay and the winner message
+    displayController.toggleHidden(
+      displayController.overlay,
+      endWindow.endWindowEl
+    );
+
+    // 4) Reset curPlayer to be playerX
+    state.curPlayer = state.playerX;
+  }
+
+  return { endWindowEl, winnerMsgEl, playAgainBtn, startMenuBtn, resetGame };
+})();
+
 const Gameboard = (function () {
   const gameboardEl = document.querySelector('.gameboard');
-  const gameboardCellEls = document.querySelectorAll('.gameboard__cell');
+  const gameboardCellsEls = document.querySelectorAll('.gameboard__cell');
 
   // State of the gameboard
   const gameboardArr = [
@@ -76,13 +107,20 @@ const Gameboard = (function () {
     }
 
     if (checkCombinations('X', arrV, arrH, arrD))
-      return displayController.showWinnerMsg(state.playerX.name);
-    else if (checkCombinations('O', arrV, arrH, arrD))
-      return displayController.showWinnerMsg(state.playerO.name);
+      return displayController.showWinnerMsg(
+        endWindow.winnerMsgEl,
+        state.playerX.name
+      );
+
+    if (checkCombinations('O', arrV, arrH, arrD))
+      return displayController.showWinnerMsg(
+        endWindow.winnerMsgEl,
+        state.playerO.name
+      );
 
     // TIE
     if (gameboardArr.every(row => row.every(cell => cell.length > 0)))
-      displayController.showWinnerMsg();
+      displayController.showWinnerMsg(endWindow.winnerMsgEl);
   }
 
   function controlPlayerMove(row, col) {
@@ -101,18 +139,18 @@ const Gameboard = (function () {
     _checkIsGameOver();
   }
 
-  return { gameboardEl, gameboardCellEls, gameboardArr, controlPlayerMove };
+  return { gameboardEl, gameboardCellsEls, gameboardArr, controlPlayerMove };
 })();
 
 const displayController = (function () {
-  const _overlay = document.querySelector('.overlay');
+  const overlay = document.querySelector('.overlay');
 
   const toggleHidden = (...els) =>
     els.forEach(el => el.classList.toggle('hidden'));
 
   // Render the gameboard
   function renderGameboard(gameboard) {
-    Gameboard.gameboardCellEls.forEach(cell => {
+    Gameboard.gameboardCellsEls.forEach(cell => {
       const cellRow = +cell.dataset.row;
       const cellCol = +cell.dataset.col;
 
@@ -122,24 +160,18 @@ const displayController = (function () {
     });
   }
 
-  function showWinnerMsg(playerName) {
-    toggleHidden(_overlay);
+  function showWinnerMsg(winnerMsgEl, playerName) {
+    toggleHidden(overlay, endWindow.endWindowEl);
 
-    const markup = `
-      <div class="msg--winner">  
-        <span>${playerName ? playerName + ' won!' : "It's a tie!"}</span>
-        <div>
-          <button class="btn--start-menu">Start menu</button>
-          <button class="btn--play-again">Play again</button>
-        </div>
-      </div>
-    `;
-
-    document.body.insertAdjacentHTML('beforeend', markup);
+    winnerMsgEl.textContent = playerName ? playerName + ' won!' : "It's a tie!";
   }
 
   function addHandlerStartBtn(handler) {
     startWindow.startBtn.addEventListener('click', handler);
+  }
+
+  function addHandlerPlayAgainBtn(handler) {
+    endWindow.playAgainBtn.addEventListener('click', handler);
   }
 
   function addHandlerPlayerMove(handler) {
@@ -155,11 +187,13 @@ const displayController = (function () {
   }
 
   return {
+    overlay,
     toggleHidden,
     renderGameboard,
     showWinnerMsg,
     addHandlerStartBtn,
     addHandlerPlayerMove,
+    addHandlerPlayAgainBtn,
   };
 })();
 
@@ -168,6 +202,8 @@ function init() {
 
   // Attach an event listener so that curPlayer can add his mark to a gamecell
   displayController.addHandlerPlayerMove(Gameboard.controlPlayerMove);
+
+  displayController.addHandlerPlayAgainBtn(endWindow.resetGame);
 }
 
 init();
