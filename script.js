@@ -13,14 +13,14 @@ const Player = function (name, marker) {
 };
 
 const startWindow = (function () {
-  const _startWindow = document.querySelector('.players__cards');
+  const startWindowEl = document.querySelector('.players__cards');
   const startBtn = document.querySelector('.btn--start');
   const _playerXInput = document.querySelector('.playerX input');
   const _playerOInput = document.querySelector('.playerO input');
 
   function startGame() {
     // Hide the start window, show the gameboard
-    displayController.toggleHidden(_startWindow, Gameboard.gameboardEl);
+    displayController.toggleHidden(startWindowEl, Gameboard.gameboardEl);
 
     // Fetch players names from the DOM
     const playerXname = _playerXInput.value ? _playerXInput.value : 'playerX';
@@ -34,7 +34,7 @@ const startWindow = (function () {
     state.curPlayer = state.playerX;
   }
 
-  return { startBtn, startGame };
+  return { startWindowEl, startBtn, startGame };
 })();
 
 const endWindow = (function () {
@@ -65,7 +65,24 @@ const endWindow = (function () {
     state.curPlayer = state.playerX;
   }
 
-  return { endWindowEl, winnerMsgEl, playAgainBtn, startMenuBtn, resetGame };
+  function returnToStartMenu() {
+    resetGame();
+
+    // Hide the gameboard, show the start menu
+    displayController.toggleHidden(
+      Gameboard.gameboardEl,
+      startWindow.startWindowEl
+    );
+  }
+
+  return {
+    endWindowEl,
+    winnerMsgEl,
+    playAgainBtn,
+    startMenuBtn,
+    resetGame,
+    returnToStartMenu,
+  };
 })();
 
 const Gameboard = (function () {
@@ -170,6 +187,10 @@ const displayController = (function () {
     startWindow.startBtn.addEventListener('click', handler);
   }
 
+  function addHandlerStartMenuBtn(handler) {
+    endWindow.startMenuBtn.addEventListener('click', handler);
+  }
+
   function addHandlerPlayAgainBtn(handler) {
     endWindow.playAgainBtn.addEventListener('click', handler);
   }
@@ -192,17 +213,16 @@ const displayController = (function () {
     renderGameboard,
     showWinnerMsg,
     addHandlerStartBtn,
-    addHandlerPlayerMove,
+    addHandlerStartMenuBtn,
     addHandlerPlayAgainBtn,
+    addHandlerPlayerMove,
   };
 })();
 
 function init() {
   displayController.addHandlerStartBtn(startWindow.startGame);
-
-  // Attach an event listener so that curPlayer can add his mark to a gamecell
   displayController.addHandlerPlayerMove(Gameboard.controlPlayerMove);
-
+  displayController.addHandlerStartMenuBtn(endWindow.returnToStartMenu);
   displayController.addHandlerPlayAgainBtn(endWindow.resetGame);
 }
 
